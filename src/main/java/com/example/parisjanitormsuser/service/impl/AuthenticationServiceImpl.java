@@ -50,13 +50,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (request.getPassword() == null || request.getPassword().isBlank()) return false;
         if (request.getRole() == null) return false;
 
-        /*// Validation de l'email
+        /* Email and Password validation to manage from frontend
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         if (!Pattern.matches(emailRegex, request.getEmail())) {
             return false;
         }
-
-        // Validation du mot de passe (exemple : au moins 8 caractères, une majuscule, un chiffre)
         String passwordRegex = "^(?=.*[A-Z])(?=.*\\d).{8,}$";
         if (!Pattern.matches(passwordRegex, request.getPassword())) {
             return false;
