@@ -49,10 +49,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request
                                 .requestMatchers(
-                                        "/api/v1/auth/**"
+                                        "/api/auth/**",
+                                        "/api/password/**"
                                 ).permitAll()
                                 .anyRequest().authenticated())
-                // 6️⃣ Désactivation de la session pour éviter les attaques CSRF via session hijacking
+                // 6️⃣ Deactivation de la session pour éviter les attaques CSRF via session hijacking
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider).addFilterBefore(
                         (Filter) jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
