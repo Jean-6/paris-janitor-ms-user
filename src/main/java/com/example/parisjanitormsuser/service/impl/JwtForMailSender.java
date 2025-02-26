@@ -15,15 +15,16 @@ import java.util.Date;
 @Component
 public class JwtForMailSender {
 
-    @Value("${application.security.jwt.secret-key}")
-    private String secretKey;
+   //@Value("${application.security.jwt.secret-key}")
+   //private String secretKey;
+   private final String SECRET_KEY = "4b50dcc5-b6c9-49a9-af2c-8d7d8a416e3b";
 
     public String generateResetToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()+ 10 * 60 * 1000))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis()+ 60 * 60 * 1000)) // Expiration dans 10 min
+                .signWith(getSigningKey(),SignatureAlgorithm.HS256)
         .compact();
     }
 
@@ -31,13 +32,13 @@ public class JwtForMailSender {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)//Use Jws instead of Jwt to parse full JWT by including signature
                 .getBody()
                 .getSubject();
     }
 
     private Key getSigningKey(){
-        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(this.SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
 
 
