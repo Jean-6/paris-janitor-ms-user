@@ -15,8 +15,20 @@ public class GlobalExceptionHandler {
                 .body(new ResultWrapper<>(false,ex.getMessage(),null));
     }
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<?> handleInvalidCredentials(InvalidCredentialsException ex) {
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ResultWrapper<>(false,ex.getMessage(),null));
+    }
+
+    @ExceptionHandler(InvalidDataException.class)
+    public ResponseEntity<?> handleInvalidData(InvalidDataException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ResultWrapper<>(false,ex.getMessage(),null));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<?> handleUnauthorized(UnauthorizedException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ResultWrapper<>(false,ex.getMessage(),null));
     }
