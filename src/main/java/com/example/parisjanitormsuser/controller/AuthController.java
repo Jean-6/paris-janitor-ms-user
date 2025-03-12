@@ -1,18 +1,21 @@
 package com.example.parisjanitormsuser.controller;
 
-import com.example.parisjanitormsuser.dto.AuthenticationRequest;
-import com.example.parisjanitormsuser.dto.AuthenticationResponse;
+import com.example.parisjanitormsuser.dto.AuthRequest;
+import com.example.parisjanitormsuser.dto.AuthResponse;
 import com.example.parisjanitormsuser.dto.RegisterRequest;
-import com.example.parisjanitormsuser.entity.ErrorResponse;
-import com.example.parisjanitormsuser.security.exception.InvalidCredentialsException;
+import com.example.parisjanitormsuser.dto.ResultWrapper;
 import com.example.parisjanitormsuser.security.exception.InvalidDataException;
+import com.example.parisjanitormsuser.security.exception.UnauthorizedException;
 import com.example.parisjanitormsuser.security.exception.UserAlreadyExistsException;
 import com.example.parisjanitormsuser.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,40 +23,47 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     @Autowired
     private AuthenticationService authenticationService;
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+    @PostMapping(value="/register", produces ="application/json")
+    public ResponseEntity<?> register( @RequestBody RegisterRequest request) {
         try{
-            AuthenticationResponse authenticationResponse = authenticationService.register(request);
-            return ResponseEntity.ok(authenticationResponse);
-        }catch(UserAlreadyExistsException e){
+            AuthResponse authResponse = authenticationService.register(request);
+            return ResponseEntity.ok(authResponse);
+        }catch(UserAlreadyExistsException ex){
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ErrorResponse("USER_EXISTS",e.getMessage()));
-        }catch(InvalidDataException e){
+                    .body(new ResultWrapper<>(false,ex.getMessage(),null));
+        }catch(InvalidDataException ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("INVALID_DATA",e.getMessage()));
-        }catch (Exception e){
+                    .body(new ResultWrapper<>(false,ex.getMessage(),null));
+        }catch (Exception ex){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse("INTERNAL_SERVER_ERROR",e.getMessage()));
+                    .body(new ResultWrapper<>(false,ex.getMessage(),null));
 
         }
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody AuthenticationRequest request) {
+    @PostMapping(value="/login", produces ="application/json")
+    public ResponseEntity<ResultWrapper<AuthResponse>> login(@Valid @RequestBody AuthRequest request) {
+
         try{
-            AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
-            return ResponseEntity.ok(authenticationResponse);
-        }catch(InvalidCredentialsException e){
+            AuthResponse result = authenticationService.authenticate(request);
+            return ResponseEntity.ok(new ResultWrapper<>(true,"authentication success",result));
+        }catch (BadCredentialsException e){
+            ResultWrapper<AuthResponse> result = new ResultWrapper<>(false,e.getMessage(),null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(result);
+        }catch (UnauthorizedException e){
+            ResultWrapper<AuthResponse> result = new ResultWrapper<>(false,e.getMessage(),null);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("INVALID_CREDENTIALS",e.getMessage()));
+                    .body(result);
         }
     }
 

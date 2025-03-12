@@ -1,19 +1,21 @@
 package com.example.parisjanitormsuser.service.impl;
 
-import com.example.parisjanitormsuser.dto.AuthenticationRequest;
-import com.example.parisjanitormsuser.dto.AuthenticationResponse;
+import com.example.parisjanitormsuser.dto.AuthRequest;
+import com.example.parisjanitormsuser.dto.AuthResponse;
 import com.example.parisjanitormsuser.dto.RegisterRequest;
 import com.example.parisjanitormsuser.entity.User;
 import com.example.parisjanitormsuser.repository.UserRepository;
 import com.example.parisjanitormsuser.security.enums.TokenType;
-import com.example.parisjanitormsuser.security.exception.InvalidCredentialsException;
 import com.example.parisjanitormsuser.security.exception.InvalidDataException;
+import com.example.parisjanitormsuser.security.exception.UnauthorizedException;
+import com.example.parisjanitormsuser.security.exception.UserAlreadyExistsException;
 import com.example.parisjanitormsuser.security.jwt.JwtService;
 import com.example.parisjanitormsuser.service.AuthenticationService;
 import com.example.parisjanitormsuser.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,7 +37,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private AuthenticationManager authenticationManager;
 
     private final RefreshTokenService refreshTokenService;
-
 
     public boolean isValidRequest(RegisterRequest request) {
 
@@ -60,15 +61,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return false;
         }*/
 
-
         return true;
     }
 
     @Override
-    public AuthenticationResponse register(RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new InvalidDataException("Cet utilisateur existe déjà");
+            throw new UserAlreadyExistsException("Cet utilisateur existe déjà");
         }
         if (!isValidRequest((request))) {
             throw new InvalidDataException("Les données fournies ne sont pas valides.");
@@ -90,7 +90,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .map(SimpleGrantedAuthority::getAuthority)
                 .toList();
 
-        return AuthenticationResponse.builder()
+        return AuthResponse.builder()
                 .accessToken(jwt)
                 .email(user.getEmail())
                 .id(user.getId())
@@ -102,27 +102,32 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthResponse authenticate(AuthRequest request) {
 
-        // Retrieve user before authentication
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new InvalidCredentialsException("Email ou mot de passe incorrect."));
-        // Authentication via Spring Security
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-        // Token generation
-        String jwt = jwtService.generateToken(user);
-        String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
+        try{
+            if (!ValidationUtils.isLoginValid(request.getEmail(),request.getPassword())) {
+                throw new BadCredentialsException("Les données fournies ne sont pas valides.");
+            }
+            // Retrieve user before authentication
+            var user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new UnauthorizedException("Email ou mot de passe incorrect."));
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+            // Token generation
+            String jwt = jwtService.generateToken(user);
+            String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
 
-        // Response building
-        return AuthenticationResponse.builder()
-                .accessToken(jwt)
-                .refreshToken(refreshToken)
-                .email(user.getEmail())
-                .id(user.getId())
-                .tokenType(TokenType.BEARER.name())
-                .build();
-
+            // Response building
+            return AuthResponse.builder()
+                    .accessToken(jwt)
+                    .refreshToken(refreshToken)
+                    .email(user.getEmail())
+                    .id(user.getId())
+                    .tokenType(TokenType.BEARER.name())
+                    .build();
+        } catch (BadCredentialsException ex){
+            throw new UnauthorizedException(ex.getMessage());
+        }
     }
 }
