@@ -18,7 +18,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "_user")
+@Table(name = "user")
 public class User implements UserDetails {
 
     @jakarta.persistence.Id
