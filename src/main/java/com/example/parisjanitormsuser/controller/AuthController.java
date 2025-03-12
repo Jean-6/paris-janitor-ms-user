@@ -33,10 +33,10 @@ public class AuthController {
 
 
     @PostMapping(value="/register", produces ="application/json")
-    public ResponseEntity<?> register( @RequestBody RegisterRequest request) {
+    public ResponseEntity<ResultWrapper<AuthResponse>> register( @RequestBody RegisterRequest request) {
         try{
-            AuthResponse authResponse = authenticationService.register(request);
-            return ResponseEntity.ok(authResponse);
+            AuthResponse result = authenticationService.register(request);
+            return ResponseEntity.ok(new ResultWrapper<>(true,"registration success",result));
         }catch(UserAlreadyExistsException ex){
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ResultWrapper<>(false,ex.getMessage(),null));

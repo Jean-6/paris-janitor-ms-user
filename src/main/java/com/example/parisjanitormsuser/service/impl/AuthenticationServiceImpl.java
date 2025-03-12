@@ -38,31 +38,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final RefreshTokenService refreshTokenService;
 
-    public boolean isValidRequest(RegisterRequest request) {
-
-        if (request == null) {
-            return false;
-        }
-
-        // Vérification des champs obligatoires
-        if (request.getFirstname() == null || request.getFirstname().isBlank()) return false;
-        if (request.getLastname() == null || request.getLastname().isBlank()) return false;
-        if (request.getEmail() == null || request.getEmail().isBlank()) return false;
-        if (request.getPassword() == null || request.getPassword().isBlank()) return false;
-        if (request.getRole() == null) return false;
-
-        /* Email and Password validation to manage from frontend
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-        if (!Pattern.matches(emailRegex, request.getEmail())) {
-            return false;
-        }
-        String passwordRegex = "^(?=.*[A-Z])(?=.*\\d).{8,}$";
-        if (!Pattern.matches(passwordRegex, request.getPassword())) {
-            return false;
-        }*/
-
-        return true;
-    }
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -70,7 +45,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException("Cet utilisateur existe déjà");
         }
-        if (!isValidRequest((request))) {
+
+        if (!ValidationUtils.isRegistrationValid(request.getFirstname(),request.getLastname(),request.getEmail(),request.getPassword())) {
             throw new InvalidDataException("Les données fournies ne sont pas valides.");
         }
 
