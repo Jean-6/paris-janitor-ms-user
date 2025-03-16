@@ -10,7 +10,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 
 @Builder
@@ -31,6 +33,16 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @OneToMany(mappedBy = "user")
+    private List<Address> addressList=new ArrayList<>();
+    @OneToMany(mappedBy = "user")
+    private List<Preference> preferences=new ArrayList<>();
+    @OneToMany(mappedBy = "user")
+    private List<com.example.parisjanitormsuser.entity.Role> roles=new ArrayList<>();
+    @OneToMany(mappedBy = "user")
+    private List<com.example.parisjanitormsuser.entity.Session> sessions=new ArrayList<>();
+    @OneToMany(mappedBy = "user")
+    private List<com.example.parisjanitormsuser.entity.RefreshToken> refreshTokens=new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
