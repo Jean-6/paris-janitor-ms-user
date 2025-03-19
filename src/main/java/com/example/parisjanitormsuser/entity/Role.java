@@ -11,9 +11,10 @@ import lombok.Setter;
 public class Role {
 
     @Id
-    private long id;
-    private String role_name;
-    private String role_description;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String name;
+    private String description;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;

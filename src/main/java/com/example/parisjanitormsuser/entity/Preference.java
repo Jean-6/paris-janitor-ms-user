@@ -10,7 +10,8 @@ import lombok.Data;
 public class Preference {
 
     @Id
-    private long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     private String preferences_key;
     private String preferences_value;
     @ManyToOne(fetch = FetchType.LAZY)
