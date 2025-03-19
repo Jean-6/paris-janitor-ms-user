@@ -33,8 +33,10 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "user")
-    private List<Address> addressList=new ArrayList<>();
+    //@OneToMany(mappedBy = "user")
+    //private List<Address> addressList=new ArrayList<>();
+    @Embedded
+    private Address address;
     @OneToMany(mappedBy = "user")
     private List<Preference> preferences=new ArrayList<>();
     @OneToMany(mappedBy = "user")
