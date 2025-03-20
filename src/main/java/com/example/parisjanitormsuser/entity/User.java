@@ -16,7 +16,6 @@ import java.util.List;
 
 
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Entity
@@ -46,10 +45,23 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<com.example.parisjanitormsuser.entity.RefreshToken> refreshTokens=new ArrayList<>();
 
+    public User() {
+        this.role = Role.USER;
+    }
+
+    /*@Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if(this.role==null){
+            throw new IllegalStateException("Le rôle de l'utilisateur n'est pas défini !");
+        }
+        return role.getAuthorities();
+    }*/
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getAuthorities();
+        return (this.role != null) ? role.getAuthorities() : Role.USER.getAuthorities();
     }
+
 
     @Override
     public String getUsername() {
