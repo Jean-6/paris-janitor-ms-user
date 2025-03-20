@@ -1,5 +1,6 @@
 package com.example.parisjanitormsuser.service.impl;
 
+import com.example.parisjanitormsuser.common.ErrorMsg;
 import com.example.parisjanitormsuser.dto.AuthRequest;
 import com.example.parisjanitormsuser.dto.AuthResponse;
 import com.example.parisjanitormsuser.dto.RegisterRequest;
@@ -10,7 +11,7 @@ import com.example.parisjanitormsuser.security.exception.InvalidDataException;
 import com.example.parisjanitormsuser.security.exception.UnauthorizedException;
 import com.example.parisjanitormsuser.security.exception.UserAlreadyExistsException;
 import com.example.parisjanitormsuser.security.jwt.JwtService;
-import com.example.parisjanitormsuser.service.AuthenticationService;
+import com.example.parisjanitormsuser.service.AuthService;
 import com.example.parisjanitormsuser.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class AuthenticationServiceImpl implements AuthenticationService {
+public class AuthServiceImp implements AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -43,11 +44,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new UserAlreadyExistsException("Cet utilisateur existe déjà");
+            throw new UserAlreadyExistsException(ErrorMsg.USER_ALREADY_EXISTS);
         }
 
         if (!ValidationUtils.isRegistrationValid(request.getFirstname(),request.getLastname(),request.getEmail(),request.getPassword())) {
-            throw new InvalidDataException("Les données fournies ne sont pas valides.");
+            throw new InvalidDataException(ErrorMsg.INVALID_DATA);
         }
 
         var user = User.builder()
@@ -82,11 +83,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         try{
             if (!ValidationUtils.isLoginValid(request.getEmail(),request.getPassword())) {
-                throw new BadCredentialsException("Les données fournies ne sont pas valides.");
+                throw new BadCredentialsException(ErrorMsg.INVALID_DATA);
             }
             // Retrieve user before authentication
             var user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new UnauthorizedException("Email ou mot de passe incorrect."));
+                    .orElseThrow(() -> new UnauthorizedException(ErrorMsg.BAD_CREDENTIALS));
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
