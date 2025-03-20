@@ -23,6 +23,23 @@ import java.time.Instant;
 public class Http401UnauthorizedEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+
+
+        String requestURI = request.getRequestURI();
+
+        // Exclure Swagger et l'endpoint d'erreur de la gestion stricte
+        if (requestURI.startsWith("/swagger-ui")
+                || requestURI.startsWith("/v3/api-docs")
+                || requestURI.equals("/swagger-ui.html")
+                || requestURI.equals("/swagger-ui-custom.html")
+                || requestURI.equals("/error")
+                || requestURI.equals("/swagger-ui/index.html")) {
+            // On laisse Swagger s'afficher (ou on peut retourner un code 200 si besoin)
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+
+
         log.error("Unauthorized error: {}", authException.getMessage());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
