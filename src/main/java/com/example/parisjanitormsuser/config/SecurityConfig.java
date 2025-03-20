@@ -1,5 +1,8 @@
-package com.example.parisjanitormsuser.security.config;
+package com.example.parisjanitormsuser.config;
 
+import com.example.parisjanitormsuser.security.config.CustomAccessDeniedHandler;
+import com.example.parisjanitormsuser.security.config.Http401UnauthorizedEntryPoint;
+import com.example.parisjanitormsuser.security.config.JwtAuthenticationFilter;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +13,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,7 +33,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
     @Autowired
-    private  JwtAuthenticationFilter jwtAuthenticationFilter;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
     @Autowired
     private  AuthenticationProvider authenticationProvider;
     @Autowired
@@ -39,7 +44,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(AbstractHttpConfigurer::disable) // Disable CSRF in local
+        http
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF in local
                 //.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())) // To be activated in prod
                 // Secure CORS Configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -50,9 +56,29 @@ public class SecurityConfig {
                         request
                                 .requestMatchers(
                                         "/api/auth/**",
-                                        "/api/password/**"
+                                        "/api/password/**",
+                                        "/api/role/**",
+
+                                        "/swagger-ui/index.html",
+                                        "/swagger-ui-custom.html",
+                                        "/swagger-ui.html",         // URL de Swagger UI
+                                        "/swagger-ui/**",           // Ressources Swagger (CSS, JS, etc.)
+                                        "/v3/api-docs/**",          // Endpoints OpenAPI
+                                        "/v3/api-docs.yaml",
+
+                                        "/api/logout"// Document YAML OpenAPI (si nécessaire)
                                 ).permitAll()
-                                .anyRequest().authenticated())
+                                /*.anyRequest().authenticated()*/)
+                .logout(logout->logout
+                        .logoutUrl("/api/auth/logout") //Definit la route de la deconnexion
+                        .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()) //Repondre 200 OK
+                        .invalidateHttpSession(true) // Detruit la session
+                        .clearAuthentication(true) // Effacer auth
+                        .addLogoutHandler((request, response, authentication) -> {
+                            SecurityContextHolder.clearContext(); // Supprime la connexion en memoire
+                        })
+                )
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(new Http401UnauthorizedEntryPoint()))
                 // 6️⃣ Deactivation de la session pour éviter les attaques CSRF via session hijacking
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider).addFilterBefore(
@@ -64,9 +90,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Collections.singletonList("*"));
+        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); // Authorized HTTP methods
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Authorized headers
+        corsConfiguration.setAllowCredentials(true);// Active les credentials pour permettre l'envoi de cookies ou autres informations d'authentification
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
