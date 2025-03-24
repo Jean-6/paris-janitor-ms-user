@@ -5,7 +5,7 @@ import com.example.parisjanitormsuser.dto.AuthRequest;
 import com.example.parisjanitormsuser.dto.AuthResponse;
 import com.example.parisjanitormsuser.dto.RegisterRequest;
 import com.example.parisjanitormsuser.entity.User;
-import com.example.parisjanitormsuser.repository.UserRepository;
+import com.example.parisjanitormsuser.repository.UserRepo;
 import com.example.parisjanitormsuser.security.enums.TokenType;
 import com.example.parisjanitormsuser.security.exception.InvalidDataException;
 import com.example.parisjanitormsuser.security.exception.UnauthorizedException;
@@ -33,7 +33,7 @@ public class AuthServiceImp implements AuthService {
     @Autowired
     private JwtService jwtService;
     @Autowired
-    private UserRepository userRepository;
+    private UserRepo userRepo;
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -43,7 +43,7 @@ public class AuthServiceImp implements AuthService {
     @Override
     public AuthResponse register(RegisterRequest request) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepo.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException(ErrorMsg.USER_ALREADY_EXISTS);
         }
 
@@ -58,7 +58,7 @@ public class AuthServiceImp implements AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .build();
-        user = userRepository.save(user);
+        user = userRepo.save(user);
         var jwt = jwtService.generateToken(user);
         var refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
@@ -86,7 +86,7 @@ public class AuthServiceImp implements AuthService {
                 throw new BadCredentialsException(ErrorMsg.INVALID_DATA);
             }
             // Retrieve user before authentication
-            var user = userRepository.findByEmail(request.getEmail())
+            var user = userRepo.findByEmail(request.getEmail())
                     .orElseThrow(() -> new UnauthorizedException(ErrorMsg.BAD_CREDENTIALS));
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
