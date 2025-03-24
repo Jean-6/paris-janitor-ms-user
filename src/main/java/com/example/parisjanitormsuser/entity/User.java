@@ -1,6 +1,7 @@
 package com.example.parisjanitormsuser.entity;
 
 import com.example.parisjanitormsuser.security.enums.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,9 +11,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 
 @Builder
@@ -24,7 +23,7 @@ public class User implements UserDetails {
 
     @jakarta.persistence.Id
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String firstname;
     private String lastname;
@@ -32,18 +31,18 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    //@OneToMany(mappedBy = "user")
-    //private List<Address> addressList=new ArrayList<>();
+    //*@OneToMany(mappedBy = "user")
+    //*private List<Address> addressList=new ArrayList<>();
     @Embedded
     private Address address;
-    @OneToMany(mappedBy = "user")
-    private List<Preference> preferences=new ArrayList<>();
-    @OneToMany(mappedBy = "user")
-    private List<com.example.parisjanitormsuser.entity.Role> roles=new ArrayList<>();
-    @OneToMany(mappedBy = "user")
-    private List<com.example.parisjanitormsuser.entity.Session> sessions=new ArrayList<>();
-    @OneToMany(mappedBy = "user")
-    private List<com.example.parisjanitormsuser.entity.RefreshToken> refreshTokens=new ArrayList<>();
+    //@OneToMany(mappedBy = "user")
+    //private List<Preference> preferences=new ArrayList<>();
+    /*@ManyToMany @JoinTable(name = "user_status", joinColumns = @JoinColumn(name="user_id"), inverseJoinColumns = @JoinColumn(name="status_id")) private Set<Status> status=new HashSet<>();*/
+    //@OneToMany(mappedBy = "user")
+    //private List<com.example.parisjanitormsuser.entity.Session> sessions=new ArrayList<>();
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<com.example.parisjanitormsuser.entity.RefreshToken> refreshTokens;
 
     public User() {
         this.role = Role.USER;
