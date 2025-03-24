@@ -23,7 +23,6 @@ import java.util.function.Function;
 @ConfigurationProperties(prefix = "application.security.jwt")
 public class JwtServiceImpl implements JwtService{
 
-
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
