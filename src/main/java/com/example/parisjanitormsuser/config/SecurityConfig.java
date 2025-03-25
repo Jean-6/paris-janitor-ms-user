@@ -59,6 +59,9 @@ public class SecurityConfig {
                                         "/api/password/**",
                                         "/api/role/**",
 
+                                        "/api/user/**",
+                                        "/api/refresh-token/**",
+
                                         "/swagger-ui/index.html",
                                         "/swagger-ui-custom.html",
                                         "/swagger-ui.html",         // URL de Swagger UI
