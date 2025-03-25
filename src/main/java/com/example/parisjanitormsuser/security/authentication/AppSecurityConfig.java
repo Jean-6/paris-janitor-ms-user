@@ -1,7 +1,7 @@
 package com.example.parisjanitormsuser.security.authentication;
 
 
-import com.example.parisjanitormsuser.repository.UserRepository;
+import com.example.parisjanitormsuser.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,11 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @RequiredArgsConstructor
 public class AppSecurityConfig {
-    private final UserRepository userRepository;
+    private final UserRepo userRepo;
 
     @Bean
     public UserDetailsService userDetailsService(){
-        return username -> userRepository.findByEmail(username)
+        return username -> userRepo.findByEmail(username)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found"));
     }
     // Interface that defines authentication logic into Spring
