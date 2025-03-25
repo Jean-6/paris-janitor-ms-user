@@ -16,7 +16,7 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     public void sendResetEmail(String to,String token) throws MessagingException {
-        String resetLink = "http://localhost:9090/api/auth/reset-password?token="+token;
+        String resetLink = "http://localhost:4200/reset-password?token="+token;
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
