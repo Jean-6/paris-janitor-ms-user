@@ -1,8 +1,5 @@
 package com.example.parisjanitormsuser.controller;
-import com.example.parisjanitormsuser.dto.AuthRequest;
-import com.example.parisjanitormsuser.dto.AuthResponse;
-import com.example.parisjanitormsuser.dto.RegisterRequest;
-import com.example.parisjanitormsuser.dto.ResponseWrapper;
+import com.example.parisjanitormsuser.dto.*;
 import com.example.parisjanitormsuser.security.exception.InvalidDataException;
 import com.example.parisjanitormsuser.security.exception.UnauthorizedException;
 import com.example.parisjanitormsuser.security.exception.UserAlreadyExistsException;
