@@ -31,18 +31,17 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    //*@OneToMany(mappedBy = "user")
-    //*private List<Address> addressList=new ArrayList<>();
     @Embedded
     private Address address;
-    //@OneToMany(mappedBy = "user")
-    //private List<Preference> preferences=new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Preference> preferences;
     /*@ManyToMany @JoinTable(name = "user_status", joinColumns = @JoinColumn(name="user_id"), inverseJoinColumns = @JoinColumn(name="status_id")) private Set<Status> status=new HashSet<>();*/
-    //@OneToMany(mappedBy = "user")
-    //private List<com.example.parisjanitormsuser.entity.Session> sessions=new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Session> sessions;
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<com.example.parisjanitormsuser.entity.RefreshToken> refreshTokens;
+    private List<RefreshToken> refreshTokens;
 
     public User() {
         this.role = Role.USER;
