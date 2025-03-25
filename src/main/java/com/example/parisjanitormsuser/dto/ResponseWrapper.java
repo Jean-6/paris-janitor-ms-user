@@ -6,9 +6,9 @@ import lombok.*;
 @Setter
 @Getter
 @NoArgsConstructor
-public class ResultWrapper <T>{
-    private boolean state;
-    private String msg;
+public class ResponseWrapper<T>{
+    private boolean success;
+    private String message;
     private T data;
     /*
      private String error;
@@ -18,9 +18,9 @@ public class ResultWrapper <T>{
     private String errorCode;
     private String message;*/
 
-    public ResultWrapper(boolean state, String msg, T data) {
-        this.state = state;
-        this.msg = msg;
+    public ResponseWrapper(boolean success, String message, T data) {
+        this.success = success;
+        this.message = message;
         this.data = data;
     }
 
