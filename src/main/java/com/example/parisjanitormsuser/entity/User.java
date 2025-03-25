@@ -33,13 +33,10 @@ public class User implements UserDetails {
     private Role role;
     @Embedded
     private Address address;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Preference> preferences;
-    /*@ManyToMany @JoinTable(name = "user_status", joinColumns = @JoinColumn(name="user_id"), inverseJoinColumns = @JoinColumn(name="status_id")) private Set<Status> status=new HashSet<>();*/
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Session> sessions;
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<RefreshToken> refreshTokens;
 

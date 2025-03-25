@@ -17,7 +17,7 @@ public class Session {
     private Long id;
     private Long session_id;
     private long expires_at;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonBackReference
     private User user;
