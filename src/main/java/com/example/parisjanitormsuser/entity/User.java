@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +14,10 @@ import java.util.*;
 
 
 @Builder
-@AllArgsConstructor
 @Data
 @Entity
 @Table(name = "user")
+@AllArgsConstructor
 public class User implements UserDetails {
 
     @jakarta.persistence.Id
@@ -41,22 +40,13 @@ public class User implements UserDetails {
     private List<RefreshToken> refreshTokens;
 
     public User() {
-        this.role = Role.USER;
-    }
 
-    /*@Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(this.role==null){
-            throw new IllegalStateException("Le rôle de l'utilisateur n'est pas défini !");
-        }
-        return role.getAuthorities();
-    }*/
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return (this.role != null) ? role.getAuthorities() : Role.USER.getAuthorities();
     }
-
 
     @Override
     public String getUsername() {

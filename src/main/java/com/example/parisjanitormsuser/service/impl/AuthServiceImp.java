@@ -6,6 +6,7 @@ import com.example.parisjanitormsuser.dto.AuthResponse;
 import com.example.parisjanitormsuser.dto.RegisterRequest;
 import com.example.parisjanitormsuser.entity.User;
 import com.example.parisjanitormsuser.repository.UserRepo;
+import com.example.parisjanitormsuser.security.enums.Role;
 import com.example.parisjanitormsuser.security.enums.TokenType;
 import com.example.parisjanitormsuser.security.exception.InvalidDataException;
 import com.example.parisjanitormsuser.security.exception.UnauthorizedException;
@@ -14,6 +15,7 @@ import com.example.parisjanitormsuser.security.jwt.JwtService;
 import com.example.parisjanitormsuser.service.AuthService;
 import com.example.parisjanitormsuser.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -39,9 +41,12 @@ public class AuthServiceImp implements AuthService {
 
     private final RefreshTokenService refreshTokenService;
 
+    static org.slf4j.Logger logger = LoggerFactory.getLogger(AuthServiceImp.class);
+
 
     @Override
     public AuthResponse register(RegisterRequest request) {
+
 
         if (userRepo.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException(ErrorMsg.USER_ALREADY_EXISTS);
@@ -56,8 +61,11 @@ public class AuthServiceImp implements AuthService {
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
+                .role(Role.USER)
                 .build();
+
+        logger.debug("user to save : "+user.toString());
+
         user = userRepo.save(user);
         var jwt = jwtService.generateToken(user);
         var refreshToken = refreshTokenService.createRefreshToken(user.getId());
