@@ -1,7 +1,9 @@
 # ParisJanitor - Microservice des utilisateurs
 
 <!--Une brève description de votre projet -->
-Ce microservice est une composante autonome conçue selon l'architecture en couche, il se concentre uniquement sur les fonctionnalités liées à la gestion des utilisateurs.
+Ce microservice est une composante autonome conçue selon l'architecture en couche, 
+il se concentre uniquement sur les fonctionnalités liées à la gestion des des profils utilisateurs,
+des permissions & rôles et de la sécurité (Bacic Auth/JWT)
 
 ## Table des matières
 
@@ -75,6 +77,8 @@ Ce microservice est une composante autonome conçue selon l'architecture en couc
 
 ## Dépannage
 
+#### 1. Récursion dans une structure de donnée
+
 L'exception HttpMessageNotWritableException signifie que Spring Boot ne peut pas convertir ton objet en JSON pour la réponse HTTP. La cause exacte est indiquée :
 
 "Document nesting depth (1001) exceeds the maximum allowed (1000)"
@@ -87,4 +91,32 @@ Une récursion dans une structure de données.
 
 Une mauvaise configuration de la sérialisation JSON.
 
-### Solution possible : Utiliser @JsonIgnore ou @JsonManagedReference / @JsonBackReference
+#### Solution possible 
+Utiliser @JsonIgnore ou @JsonManagedReference / @JsonBackReference
+
+#### 2. Probleme de Centralisation de version dans Maven
+
+Elle a rendu impossible l'affichage du Swagger.
+
+"Unauthorized error: Full authentication is required" → Problème avec Spring Security, qui bloque l'accès à Swagger.
+
+"java.lang.NoSuchMethodError: ControllerAdviceBean.<init>(Object)" → Problème de compatibilité des dépendances Spring.
+
+#### Solution possible
+
+Ajout de la section <properties> dans le fichier pom.xml de Maven ,
+utilisée pour définir les variables (versions) réutilisables  
+pour les autres dépendences du projet pour des raisons de compatibilités.
+
+
+
+#### 3. L'erreur MalformedInputException: Input length = 1
+
+Indique généralement un problème avec l'encodage des fichiers dans le projet, 
+en particulier avec le fichier application.properties. Ce problème se produit 
+souvent lorsque les caractères spéciaux ou l'encodage des fichiers ne sont pas 
+correctement gérés.
+
+#### Solution possible
+
+S'Assurer que le fichier application.properties est encodé en UTF-8.
