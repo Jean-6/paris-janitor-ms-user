@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -30,7 +29,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity
-public class SecurityConfig {
+public class Security {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -45,7 +44,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF in local
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF in local;
                 //.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())) // To be activated in prod
                 // Secure CORS Configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -57,21 +56,22 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api/auth/**",
                                         "/api/password/**",
-                                        "/api/role/**",
 
                                         "/api/user/**",
                                         "/api/refresh-token/**",
 
-                                        "/swagger-ui/index.html",
                                         "/swagger-ui-custom.html",
                                         "/swagger-ui.html",         // URL de Swagger UI
                                         "/swagger-ui/**",           // Ressources Swagger (CSS, JS, etc.)
                                         "/v3/api-docs/**",          // Endpoints OpenAPI
                                         "/v3/api-docs.yaml",
-
+                                        "/openapi/**",
+                                        "/error",
+                                        "/openapi/default",
                                         "/api/logout"// Document YAML OpenAPI (si nécessaire)
                                 ).permitAll()
-                                /*.anyRequest().authenticated()*/)
+
+                                .anyRequest().authenticated())
                 .logout(logout->logout
                         .logoutUrl("/api/auth/logout") //Definit la route de la deconnexion
                         .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()) //Repondre 200 OK
@@ -93,7 +93,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));//http://localhost:4200
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); // Authorized HTTP methods
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Authorized headers
         corsConfiguration.setAllowCredentials(true);// Active les credentials pour permettre l'envoi de cookies ou autres informations d'authentification
