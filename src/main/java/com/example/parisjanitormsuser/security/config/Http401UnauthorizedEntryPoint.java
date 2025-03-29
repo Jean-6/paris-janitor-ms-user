@@ -16,29 +16,17 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.logging.Logger;
 
 // interface used to manage authentication error , when user attempts to access protected resource
 @Component
 @Slf4j
 public class Http401UnauthorizedEntryPoint implements AuthenticationEntryPoint {
+
+    public static Logger logger = Logger.getLogger(Http401UnauthorizedEntryPoint.class.getName());
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-
-
-        String requestURI = request.getRequestURI();
-
-        // Exclure Swagger et l'endpoint d'erreur de la gestion stricte
-        if (requestURI.startsWith("/swagger-ui")
-                || requestURI.startsWith("/v3/api-docs")
-                || requestURI.equals("/swagger-ui.html")
-                || requestURI.equals("/swagger-ui-custom.html")
-                || requestURI.equals("/error")
-                || requestURI.equals("/swagger-ui/index.html")) {
-            // On laisse Swagger s'afficher (ou on peut retourner un code 200 si besoin)
-            response.setStatus(HttpServletResponse.SC_OK);
-            return;
-        }
-
 
         log.error("Unauthorized error: {}", authException.getMessage());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
