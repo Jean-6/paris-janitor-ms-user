@@ -4,6 +4,12 @@ import com.example.parisjanitormsuser.security.exception.InvalidDataException;
 import com.example.parisjanitormsuser.security.exception.UnauthorizedException;
 import com.example.parisjanitormsuser.security.exception.UserAlreadyExistsException;
 import com.example.parisjanitormsuser.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -25,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "User API", description = "Gestion des images")
 public class AuthController {
 
     @Autowired
@@ -32,10 +39,18 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 
+
+
+    @Operation(summary = "Register user", description = "")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = ""),
+            @ApiResponse(responseCode = "404", description = "",
+                    content = @Content(schema = @Schema()))
+    })
     @PostMapping(value="/register", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseWrapper<AuthResponse>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<ResponseWrapper<LoginResponse>> register(@RequestBody RegisterRequest request) {
         try{
-            AuthResponse result = authService.register(request);
+            LoginResponse result = authService.register(request);
             return ResponseEntity.ok(new ResponseWrapper<>(true,"registration success",result));
         }catch(UserAlreadyExistsException ex){
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -51,16 +66,16 @@ public class AuthController {
     }
 
     @PostMapping(value="/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseWrapper<AuthResponse>> login(@Valid @RequestBody AuthRequest request) {
+    public ResponseEntity<ResponseWrapper<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         try{
-            AuthResponse result = authService.authenticate(request);
+            LoginResponse result = authService.authenticate(request);
             return ResponseEntity.ok(new ResponseWrapper<>(true,"authentication success",result));
         }catch (BadCredentialsException e){
-            ResponseWrapper<AuthResponse> result = new ResponseWrapper<>(false,e.getMessage(),null);
+            ResponseWrapper<LoginResponse> result = new ResponseWrapper<>(false,e.getMessage(),null);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(result);
         }catch (UnauthorizedException e){
-            ResponseWrapper<AuthResponse> result = new ResponseWrapper<>(false,e.getMessage(),null);
+            ResponseWrapper<LoginResponse> result = new ResponseWrapper<>(false,e.getMessage(),null);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(result);
         }

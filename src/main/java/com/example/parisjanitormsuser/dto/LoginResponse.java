@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class AuthResponse {
+public class LoginResponse {
     private  Long id;
     private String email;
     private List<String> roles;
