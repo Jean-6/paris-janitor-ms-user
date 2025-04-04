@@ -1,8 +1,8 @@
 package com.example.parisjanitormsuser.service.impl;
 
 import com.example.parisjanitormsuser.common.ErrorMsg;
-import com.example.parisjanitormsuser.dto.AuthRequest;
-import com.example.parisjanitormsuser.dto.AuthResponse;
+import com.example.parisjanitormsuser.dto.LoginRequest;
+import com.example.parisjanitormsuser.dto.LoginResponse;
 import com.example.parisjanitormsuser.dto.RegisterRequest;
 import com.example.parisjanitormsuser.entity.User;
 import com.example.parisjanitormsuser.repository.UserRepo;
@@ -45,7 +45,7 @@ public class AuthServiceImp implements AuthService {
 
 
     @Override
-    public AuthResponse register(RegisterRequest request) {
+    public LoginResponse register(RegisterRequest request) {
 
 
         if (userRepo.existsByEmail(request.getEmail())) {
@@ -75,7 +75,7 @@ public class AuthServiceImp implements AuthService {
                 .map(SimpleGrantedAuthority::getAuthority)
                 .toList();
 
-        return AuthResponse.builder()
+        return LoginResponse.builder()
                 .accessToken(jwt)
                 .email(user.getEmail())
                 .id(user.getId())
@@ -87,7 +87,7 @@ public class AuthServiceImp implements AuthService {
 
 
     @Override
-    public AuthResponse authenticate(AuthRequest request) {
+    public LoginResponse authenticate(LoginRequest request) {
 
         try{
             if (!ValidationUtils.isLoginValid(request.getEmail(),request.getPassword())) {
@@ -104,7 +104,7 @@ public class AuthServiceImp implements AuthService {
             String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
 
             // Response building
-            return AuthResponse.builder()
+            return LoginResponse.builder()
                     .accessToken(jwt)
                     .refreshToken(refreshToken)
                     .email(user.getEmail())
