@@ -56,19 +56,12 @@ public class Security {
                                 .requestMatchers(
                                         "/api/auth/**",
                                         "/api/password/**",
-
                                         "/api/user/**",
                                         "/api/refresh-token/**",
-
-                                        "/swagger-ui-custom.html",
-                                        "/swagger-ui.html",         // URL de Swagger UI
-                                        "/swagger-ui/**",           // Ressources Swagger (CSS, JS, etc.)
-                                        "/v3/api-docs/**",          // Endpoints OpenAPI
-                                        "/v3/api-docs.yaml",
-                                        "/openapi/**",
-                                        "/error",
-                                        "/openapi/default",
-                                        "/api/logout"// Document YAML OpenAPI (si nécessaire)
+                                        //Swagger
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**",// Resources Swagger (CSS, JS, etc.)
+                                        "/api/logout"
                                 ).permitAll()
 
                                 .anyRequest().authenticated())
