@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,9 +13,7 @@ import java.util.*;
 
 
 @Builder
-@Data
 @Entity
-@Table(name = "user")
 @AllArgsConstructor
 public class User implements UserDetails {
 
@@ -24,10 +21,10 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String firstname;
-    private String lastname;
-    private String email;
-    private String password;
+    @Embedded
+    private PrivateInfo privateInfo;
+    @Embedded
+    private ProfileInfo profileInfo;
     @Enumerated(EnumType.STRING)
     private Role role;
     @Embedded
@@ -49,8 +46,13 @@ public class User implements UserDetails {
     }
 
     @Override
+    public String getPassword() {
+        return privateInfo.getPassword();
+    }
+
+    @Override
     public String getUsername() {
-        return "";
+        return privateInfo.getEmail();
     }
 
     @Override
