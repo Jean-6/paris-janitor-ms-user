@@ -1,8 +1,6 @@
 package com.example.parisjanitormsuser.security.authentication;
-
-
 import com.example.parisjanitormsuser.repository.UserRepo;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,15 +13,31 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-@RequiredArgsConstructor
+@Slf4j
 public class AppSecurityConfig {
+
     private final UserRepo userRepo;
+
+    public AppSecurityConfig(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     @Bean
     public UserDetailsService userDetailsService(){
-        return username -> userRepo.findByEmail(username)
-                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
+        return username -> {
+            log.info("Tentative de chargement de l'utilisateur avec l'email : {}",username);
+            return userRepo.findByPrivateInfoEmail(username)
+                    .map(user -> {
+                        log.info("Utilisateur trouvé"+user.getProfileInfo().getFirstname());
+                        return user;
+                    })
+                    .orElseThrow(()->{
+                        log.error("Utilisateur non trouvé pour l'email : {}", username);
+                        return new UsernameNotFoundException("User not found");
+                    });
+        };
     }
+
     // Interface that defines authentication logic into Spring
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -37,7 +51,6 @@ public class AppSecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
