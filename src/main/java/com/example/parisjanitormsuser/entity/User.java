@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +15,7 @@ import java.util.*;
 
 @Builder
 @Entity
+@Data
 @AllArgsConstructor
 public class User implements UserDetails {
 
@@ -25,8 +27,6 @@ public class User implements UserDetails {
     private PrivateInfo privateInfo;
     @Embedded
     private ProfileInfo profileInfo;
-    @Enumerated(EnumType.STRING)
-    private Role role;
     @Embedded
     private Address address;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -42,7 +42,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return (this.role != null) ? role.getAuthorities() : Role.USER.getAuthorities();
+        return (this.profileInfo.getRole() != null) ? this.profileInfo.getRole().getAuthorities() : Role.USER.getAuthorities();
     }
 
     @Override
