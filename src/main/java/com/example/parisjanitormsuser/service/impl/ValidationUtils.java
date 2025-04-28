@@ -24,8 +24,8 @@ public class ValidationUtils {
         return field != null && !field.trim().isEmpty();
     }
 
-    public static boolean isRegistrationValid(String firstname,String lastname,String email, String password) {
-        return isFieldNotEmpty(firstname) && isFieldNotEmpty(lastname) && isEmailValid(email) && isPasswordValid(password) ;
+    public static boolean isRegistrationValid(String username,String email, String password) {
+        return isFieldNotEmpty(username) && isFieldNotEmpty(email) && isEmailValid(email) && isPasswordValid(password) ;
     }
 
     public static boolean isLoginValid(String email, String password) {

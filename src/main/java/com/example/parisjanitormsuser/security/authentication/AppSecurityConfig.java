@@ -25,14 +25,14 @@ public class AppSecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(){
         return username -> {
-            log.info("Tentative de chargement de l'utilisateur avec l'email : {}",username);
+            log.info("Attempt to load user by email: {}",username);
             return userRepo.findByPrivateInfoEmail(username)
                     .map(user -> {
-                        log.info("Utilisateur trouvé"+user.getProfileInfo().getFirstname());
+                        log.info("user founded "+user.getProfileInfo().getUsername());
                         return user;
                     })
                     .orElseThrow(()->{
-                        log.error("Utilisateur non trouvé pour l'email : {}", username);
+                        log.error("user not found: {}", username);
                         return new UsernameNotFoundException("User not found");
                     });
         };

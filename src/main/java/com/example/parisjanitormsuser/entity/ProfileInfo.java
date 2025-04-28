@@ -3,6 +3,7 @@ package com.example.parisjanitormsuser.entity;
 
 import com.example.parisjanitormsuser.security.enums.Role;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
@@ -21,4 +22,8 @@ public class ProfileInfo {
     private String username;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @Embedded
+    private Address address;
+
+    public ProfileInfo(String username, Role role) {}
 }

@@ -17,7 +17,6 @@ public class GlobalErrorFilter implements Filter {
         this.objectMapper = objectMapper;
     }
 
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Filter.super.init(filterConfig);
@@ -33,7 +32,6 @@ public class GlobalErrorFilter implements Filter {
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
             httpServletResponse.setContentType("application/json");
             httpServletResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-
             // Response of error standardized
             ApiError apiError = new ApiError(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),

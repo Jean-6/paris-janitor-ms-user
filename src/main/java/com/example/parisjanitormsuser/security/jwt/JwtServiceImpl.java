@@ -1,6 +1,8 @@
 package com.example.parisjanitormsuser.security.jwt;
 
+
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -16,7 +18,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
 
 @Service
 @Configuration
@@ -38,13 +39,21 @@ public class JwtServiceImpl implements JwtService{
 
     @Override
     public String generateToken(UserDetails userDetails) {
+
         return generateToken(new HashMap<>(), userDetails);
     }
 
     @Override
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String userName = extractUserName(token);
-        return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        try{
+            final String userName = extractUserName(token);
+            return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        }catch(JwtException | IllegalArgumentException e){
+            //logger.error("Invalid JWT token", e);
+            throw new JwtException("Token is not valid or has expired");
+        }
+
+
     }
 
     private boolean isTokenExpired(String token) {
