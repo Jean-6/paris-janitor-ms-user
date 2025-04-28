@@ -12,10 +12,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,30 +27,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "User API", description = "Gestion des images")
+@Tag(name = "Authentication Controller", description = "Gestion de l'authentification")
 public class AuthController {
-
     @Autowired
     private AuthService authService;
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-
-
-
-    @Operation(summary = "Register user", description = "")
+    @Operation(summary = "Register a new user", description = "Allows a user to create a new account by providing information such as firstname, lastname, email and password")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = ""),
             @ApiResponse(responseCode = "404", description = "",
                     content = @Content(schema = @Schema()))
     })
     @PostMapping(value="/register", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseWrapper<LoginResponse>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<ResponseWrapper<AuthRes>> register(@RequestBody RegisterReq request) {
         try{
-            LoginResponse result = authService.register(request);
+            AuthRes result = authService.register(request);
+            //tester le retour de result avec le return
             return ResponseEntity.ok(new ResponseWrapper<>(true,"registration success",result));
         }catch(UserAlreadyExistsException ex){
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -65,28 +61,56 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Login user", description = "")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = ""),
+            @ApiResponse(responseCode = "404", description = "",
+                    content = @Content(schema = @Schema()))
+    })
     @PostMapping(value="/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseWrapper<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ResponseWrapper<AuthRes>> login(@Valid @RequestBody LoginReq request) {
         try{
-            LoginResponse result = authService.authenticate(request);
+            AuthRes result = authService.authenticate(request);
+            //tester le retour de result avec le return
             return ResponseEntity.ok(new ResponseWrapper<>(true,"authentication success",result));
         }catch (BadCredentialsException e){
-            ResponseWrapper<LoginResponse> result = new ResponseWrapper<>(false,e.getMessage(),null);
+            ResponseWrapper<AuthRes> result = new ResponseWrapper<>(false,e.getMessage(),null);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(result);
         }catch (UnauthorizedException e){
-            ResponseWrapper<LoginResponse> result = new ResponseWrapper<>(false,e.getMessage(),null);
+            ResponseWrapper<AuthRes> result = new ResponseWrapper<>(false,e.getMessage(),null);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(result);
         }
     }
 
+    @Operation(summary = "Logout user", description = "")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = ""),
+            @ApiResponse(responseCode = "404", description = "",
+                    content = @Content(schema = @Schema()))
+    })
     @PostMapping(value="/logout",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ResponseWrapper<String>> logout(HttpServletRequest request, HttpServletResponse response) {
-        // Supprimer  la session et l'authentification
-        request.getSession().invalidate();
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok(new ResponseWrapper<>(true,"Deconnexion résussie",null));
+
+        try{
+            // Don't create session if it not exists
+            HttpSession session = request.getSession(false);
+            if(session != null){
+                session.invalidate();
+            }
+            SecurityContextHolder.clearContext();
+            log.info("User successfully logged out");
+            return ResponseEntity.ok(new ResponseWrapper<>(true,"logout success",null));
+        } catch(IllegalStateException ex){
+            log.error(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseWrapper<>(false,"Session already invalidate",null));
+        } catch(Exception e){
+            log.error("Unexpected error during logout", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseWrapper<>(false,"Error during disconnection",null));
+        }
     }
 
 }

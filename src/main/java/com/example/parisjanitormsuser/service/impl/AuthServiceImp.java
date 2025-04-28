@@ -1,10 +1,14 @@
 package com.example.parisjanitormsuser.service.impl;
 
 import com.example.parisjanitormsuser.common.ErrorMsg;
-import com.example.parisjanitormsuser.dto.LoginRequest;
-import com.example.parisjanitormsuser.dto.LoginResponse;
-import com.example.parisjanitormsuser.dto.RegisterRequest;
+import com.example.parisjanitormsuser.dto.LoginReq;
+import com.example.parisjanitormsuser.dto.AuthRes;
+import com.example.parisjanitormsuser.dto.RegisterReq;
+import com.example.parisjanitormsuser.entity.PrivateInfo;
+import com.example.parisjanitormsuser.entity.ProfileInfo;
+import com.example.parisjanitormsuser.entity.Session;
 import com.example.parisjanitormsuser.entity.User;
+import com.example.parisjanitormsuser.repository.SessionRepo;
 import com.example.parisjanitormsuser.repository.UserRepo;
 import com.example.parisjanitormsuser.security.enums.Role;
 import com.example.parisjanitormsuser.security.enums.TokenType;
@@ -15,16 +19,21 @@ import com.example.parisjanitormsuser.security.jwt.JwtService;
 import com.example.parisjanitormsuser.service.AuthService;
 import com.example.parisjanitormsuser.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -37,79 +46,94 @@ public class AuthServiceImp implements AuthService {
     @Autowired
     private UserRepo userRepo;
     @Autowired
+    private SessionRepo sessionRepo;
+    @Autowired
     private AuthenticationManager authenticationManager;
-
     private final RefreshTokenService refreshTokenService;
 
-    static org.slf4j.Logger logger = LoggerFactory.getLogger(AuthServiceImp.class);
-
-
     @Override
-    public LoginResponse register(RegisterRequest request) {
+    public AuthRes register(RegisterReq request) {
 
+        log.debug("register : {}", request.toString());
 
-        if (userRepo.existsByEmail(request.getEmail())) {
+        if (userRepo.existsByPrivateInfoEmail(request.getPrivateInfo().getEmail())) {
             throw new UserAlreadyExistsException(ErrorMsg.USER_ALREADY_EXISTS);
         }
-
-        if (!ValidationUtils.isRegistrationValid(request.getFirstname(),request.getLastname(),request.getEmail(),request.getPassword())) {
+        if (!ValidationUtils.isRegistrationValid(
+                request.getProfileInfo().getUsername(),
+                request.getPrivateInfo().getEmail(),
+                request.getPrivateInfo().getPassword())){
             throw new InvalidDataException(ErrorMsg.INVALID_DATA);
         }
-
         var user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .build();
+                .profileInfo(
+                        new ProfileInfo(request.getProfileInfo().getUsername(),Role.USER))
+                .privateInfo(
+                        new PrivateInfo(request.getPrivateInfo().getEmail(),passwordEncoder.encode(request.getPrivateInfo().getPassword())))
+                        .build();
 
-        logger.debug("user to save : "+user.toString());
-
+        log.debug("user to save : "+user.toString());
         user = userRepo.save(user);
         var jwt = jwtService.generateToken(user);
         var refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
-        var roles = user.getRole().getAuthorities()
+        var roles = user.getProfileInfo().getRole().getAuthorities()
                 .stream()
                 .map(SimpleGrantedAuthority::getAuthority)
                 .toList();
 
-        return LoginResponse.builder()
-                .accessToken(jwt)
-                .email(user.getEmail())
+        return AuthRes.builder()
                 .id(user.getId())
+                .accessToken(jwt)
+                .email(user.getPrivateInfo().getEmail())
+                .profileInfo(user.getProfileInfo())
                 .refreshToken(refreshToken.getToken())
-                .roles(roles)
-                .tokenType(TokenType.BEARER.name())
+                .tokenType(TokenType.BEARER)
                 .build();
     }
 
+    public void userSessionCreation(User user){
+        //Creation de session
+        Session session = new Session();
+        session.setUser(user);
+        session.setCreatedAt(Instant.now());
+        session.setExpires_at(Instant.now().plus(1,ChronoUnit.HOURS));
+        sessionRepo.save(session);
+    }
 
     @Override
-    public LoginResponse authenticate(LoginRequest request) {
+    public AuthRes authenticate(LoginReq request) {
 
+        log.debug("login : "+ request.toString());
         try{
             if (!ValidationUtils.isLoginValid(request.getEmail(),request.getPassword())) {
                 throw new BadCredentialsException(ErrorMsg.INVALID_DATA);
             }
             // Retrieve user before authentication
-            var user = userRepo.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new UnauthorizedException(ErrorMsg.BAD_CREDENTIALS));
-            authenticationManager.authenticate(
+            var user = userRepo.findByPrivateInfoEmail(request.getEmail())
+                    .orElseThrow(() -> {
+                        log.error("user not found");
+                        return new UnauthorizedException(ErrorMsg.BAD_CREDENTIALS);
+                    });
+            log.debug(user.toString());
+
+            Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
+            log.debug("login 1: "+ user.toString());
+            // Session creation
+            userSessionCreation(user);
             // Token generation
             String jwt = jwtService.generateToken(user);
             String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
-
             // Response building
-            return LoginResponse.builder()
+            return AuthRes.builder()
+                    .id(user.getId())
+                    .email(user.getPrivateInfo().getEmail())
+                    .profileInfo(user.getProfileInfo())
                     .accessToken(jwt)
                     .refreshToken(refreshToken)
-                    .email(user.getEmail())
-                    .id(user.getId())
-                    .tokenType(TokenType.BEARER.name())
+                    .tokenType(TokenType.BEARER)
                     .build();
         } catch (BadCredentialsException ex){
             throw new UnauthorizedException(ex.getMessage());
