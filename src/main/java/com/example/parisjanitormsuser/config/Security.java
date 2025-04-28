@@ -66,22 +66,21 @@ public class Security {
 
                                 .anyRequest().authenticated())
                 .logout(logout->logout
-                        .logoutUrl("/api/auth/logout") //Definit la route de la deconnexion
-                        .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()) //Repondre 200 OK
-                        .invalidateHttpSession(true) // Detruit la session
-                        .clearAuthentication(true) // Effacer auth
+                        .logoutUrl("/api/auth/logout") // Define logout route
+                        .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()) // Respond 200 OK
+                        .invalidateHttpSession(true) // Destroy session
+                        .clearAuthentication(true) // Clear auth
                         .addLogoutHandler((request, response, authentication) -> {
-                            SecurityContextHolder.clearContext(); // Supprime la connexion en memoire
+                            SecurityContextHolder.clearContext(); // Delete connection into memory
                         })
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new Http401UnauthorizedEntryPoint()))
-                // 6️⃣ Deactivation de la session pour éviter les attaques CSRF via session hijacking
+                // 6️⃣ Session deactivation to avoid CSRF attack by session hijacking
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider).addFilterBefore(
                         (Filter) jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
 
@@ -89,7 +88,7 @@ public class Security {
         corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));//http://localhost:4200
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); // Authorized HTTP methods
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Authorized headers
-        corsConfiguration.setAllowCredentials(true);// Active les credentials pour permettre l'envoi de cookies ou autres informations d'authentification
+        corsConfiguration.setAllowCredentials(true);// Enable credentials to allow cookies sending or others auth information
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
