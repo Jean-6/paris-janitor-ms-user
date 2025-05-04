@@ -2,50 +2,44 @@ package com.example.parisjanitormsuser.exception;
 
 
 
-import com.example.parisjanitormsuser.dto.ErrorResponse;
+import com.example.parisjanitormsuser.common.ErrorMsg;
+import com.example.parisjanitormsuser.dto.ErrorRes;
+import com.example.parisjanitormsuser.dto.ResponseWrapper;
+import com.example.parisjanitormsuser.security.exception.BadCredentialsException;
+import com.example.parisjanitormsuser.security.exception.InvalidDataException;
+import com.example.parisjanitormsuser.security.exception.UnauthorizedException;
+import com.example.parisjanitormsuser.security.exception.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-import java.lang.IllegalArgumentException;
 
 
 @ControllerAdvice
 public class GlobalException {
 
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex){
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND.value())
-                .body(new ErrorResponse("","NOT_FOUND",""));//"Resource Not Found"
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ResponseWrapper<Object>> userAlreadyExistsException(UserAlreadyExistsException ex){
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ResponseWrapper.conflict(ErrorMsg.USER_ALREADY_EXISTS));
     }
 
-    @ExceptionHandler(java.lang.IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException ex){
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST.value())
-                .body(new ErrorResponse("","BAD_REQUEST",""));//"Bad Request"
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ResponseWrapper<Object>> badCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ResponseWrapper.badRequest(ErrorMsg.BAD_CREDENTIALS));
     }
 
-    @ExceptionHandler(ConflictException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<ErrorResponse> handleConflictException(ConflictException ex){
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT.value())
-                .body(new ErrorResponse("","CONFLICT",""));//"Conflict"
+    @ExceptionHandler(InvalidDataException.class)
+    public ResponseEntity<ResponseWrapper<Object>> invalidData(InvalidDataException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ResponseWrapper.badRequest(ErrorMsg.BAD_CREDENTIALS));
     }
 
-    @ExceptionHandler(GenericException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex){
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .body(new ErrorResponse("","INTERNAL_SERVER_ERROR",""));//"Internal Server Error"
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<?> unauthorized(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ResponseWrapper.unauthorized(ErrorMsg.UNAUTHORIZED));
     }
-
 }

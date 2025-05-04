@@ -1,7 +1,6 @@
 package com.example.parisjanitormsuser.config;
 
-
-import com.example.parisjanitormsuser.dto.ApiError;
+import com.example.parisjanitormsuser.dto.ResponseWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,13 +32,13 @@ public class GlobalErrorFilter implements Filter {
             httpServletResponse.setContentType("application/json");
             httpServletResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             // Response of error standardized
-            ApiError apiError = new ApiError(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            ResponseWrapper<Void> responseWrapper = new ResponseWrapper<>(
+                    false,
                     "Internal Server Error",
-                    ex.getMessage(),
-                    request.getServletContext().getContextPath()
-            );
-            String jsonResponse = objectMapper.writeValueAsString(apiError);
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    request.getServletContext().getContextPath());
+            String jsonResponse = objectMapper.writeValueAsString(responseWrapper);
             httpServletResponse.getWriter().write(jsonResponse);
 
         }
