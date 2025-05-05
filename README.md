@@ -26,8 +26,8 @@ des permissions & rôles et de la sécurité (Bacic Auth/JWT)
 ## Introduction
 
 <!--Fournir une description plus détaillée de votre projet, en Expliquant les objectifs, les fonctionnalités principales et le contexte du projet.-->
-![Swagger UI](./docs/swagger1.png)
-![Swagger UI](./docs/swagger2.png)
+![Swagger UI](https://github.com/Jean-6/paris-janitor-ms-user/blob/master/assets/swagger1.png)
+![Swagger UI](https://github.com/Jean-6/paris-janitor-ms-user/blob/master/assets/swagger1.png)
 ## Prérequis
 
 - Java 17
