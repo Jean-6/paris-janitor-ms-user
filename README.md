@@ -1,9 +1,8 @@
 # ParisJanitor - Microservice des utilisateurs
 
-<!--Une brève description de votre projet -->
-Ce microservice est une composante autonome conçue selon l'architecture en couche, 
+Ce microservice est une composante autonome conçue selon l'architecture en couche,
 il se concentre uniquement sur les fonctionnalités liées à la gestion des des profils utilisateurs,
-des permissions & rôles et de la sécurité (Bacic Auth/JWT)
+des permissions & rôles et de la sécurité (Bacic Auth/JWT).
 
 ## Table des matières
 
@@ -19,26 +18,53 @@ des permissions & rôles et de la sécurité (Bacic Auth/JWT)
 9. [Deploiement](#deploiement)
 10. [Points](#Points de Terminaison API)
 11. [Authentification](#Authentification)
-12. [Exemples](#Exemples)
-13. [Dépannage](#Dépannage)
+12. [Dépannage](#Dépannage)
 
 
 ## Introduction
 
-<!--Fournir une description plus détaillée de votre projet, en Expliquant les objectifs, les fonctionnalités principales et le contexte du projet.-->
-![Swagger UI](https://github.com/Jean-6/paris-janitor-ms-user/blob/master/assets/swagger1.png)
-![Swagger UI](https://github.com/Jean-6/paris-janitor-ms-user/blob/master/assets/swagger1.png)
+<!--Une brève description de votre projet -->
+Ce microservice est une composante autonome conçue selon l'architecture en couche,
+il se concentre uniquement sur les fonctionnalités liées à la gestion des des profils utilisateurs,
+des permissions & rôles et de la sécurité (Bacic Auth/JWT)
+
+
+![Swagger 1](./assets/swagger1.png)
+![Swagger 2](./assets/swagger2.png)
+
+
 ## Prérequis
 
 - Java 17
 - Maven 3.9.9
 - Spring Boot 3.3.5
-- Hibernate & JPA
+- Spring Data JPA, Hibernate
 - Base de données relationnelles: MySQL Workbench 8.0
 - Spring Security (Basic Auth & JWT)
 
-## Architecture
+## Architecture en couche 
 
+Le principe est de favoriser la modularité, la réutilisabilité et la maintenance du code.
+Chaque couche communique uniquement avec la coucje immédiatement inférieure ou supérieure, garantissant une séparation claire des responsabilités.
+
+### Présentation (Controller)
+
+### Service (Business Logic)
+Rôle : La couche de service contient la logique métier. Elle orchestre les appels aux différentes couches et applique les règles métier spécifiques.
+
+Composants associés : Services (@Service), gestion des transactions, logique métier.
+
+### Persistance (Repository)
+Rôle : La couche de persistance gère l'accès aux données (base de données, fichiers, etc.). Elle est responsable de la gestion des entités et de la communication avec la base de données via des ORM comme JPA/Hibernate.
+
+Composants associés : Repositories (@Repository), entités JPA, interfaces CrudRepository, JpaRepository.
+
+### Sécurité (Security)
+Rôle : La couche de sécurité gère les mécanismes d'authentification et d'autorisation, en s'assurant que seuls les utilisateurs autorisés peuvent accéder à certaines ressources.
+
+Composants associés : Spring Security, JWT, filtres de sécurité, services d'authentification.
+
+### Intégration (Optionnelle)
 
 ## Points de terminaison
 
