@@ -26,12 +26,14 @@ des permissions & rôles et de la sécurité (Bacic Auth/JWT)
 ## Introduction
 
 <!--Fournir une description plus détaillée de votre projet, en Expliquant les objectifs, les fonctionnalités principales et le contexte du projet.-->
-
+![Swagger UI](./docs/swagger1.png)
+![Swagger UI](./docs/swagger2.png)
 ## Prérequis
 
 - Java 17
 - Maven 3.9.9
 - Spring Boot 3.3.5
+- Hibernate & JPA
 - Base de données relationnelles: MySQL Workbench 8.0
 - Spring Security (Basic Auth & JWT)
 
