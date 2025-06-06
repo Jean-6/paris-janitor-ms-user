@@ -3,9 +3,7 @@ package com.example.parisjanitormsuser.entity;
 import com.example.parisjanitormsuser.security.enums.Role;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,16 +17,22 @@ import java.util.*;
 @AllArgsConstructor
 public class User implements UserDetails {
 
+    @Getter
+    @Setter
     @jakarta.persistence.Id
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Embedded
     private PrivateInfo privateInfo;
+
+    //@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Embedded
     private ProfileInfo profileInfo;
-    @Embedded
-    private Address address;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ProviderInfo providerInfo;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Session> sessions;

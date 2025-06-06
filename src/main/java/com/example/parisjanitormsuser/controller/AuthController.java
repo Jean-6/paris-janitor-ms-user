@@ -36,63 +36,74 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @Operation(summary = "Register a new user", description = "Allows a user to create a new account by providing information such as firstname, lastname, email and password")
+    @Operation(summary = "Register a new user", description = "Allows a user to create a new account by providing firstname, lastname, email, and password.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = ""),
-            @ApiResponse(responseCode = "404", description = "",
-                    content = @Content(schema = @Schema()))
+            @ApiResponse(responseCode = "200", description = "Registration successful",
+                    content = @Content(schema = @Schema(implementation = AuthRes.class))),
+            @ApiResponse(responseCode = "409", description = "User already exists",
+                    content = @Content(schema = @Schema(implementation = ResponseWrapper.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid data provided",
+                    content = @Content(schema = @Schema(implementation = ResponseWrapper.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PostMapping(value="/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ResponseWrapper<AuthRes>> register(@RequestBody RegisterReq request) {
+        log.debug("register route");
         try{
-            AuthRes result = authService.register(request);
-            //tester le retour de result avec le return
-            return ResponseEntity.ok(new ResponseWrapper<>(true,"registration success",result));
+            AuthRes authRes = authService.register(request);
+            return ResponseEntity.ok(ResponseWrapper.ok(authRes,"registration success"));
         }catch(UserAlreadyExistsException ex){
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ResponseWrapper<>(false,ex.getMessage(),null));
+                    .body(ResponseWrapper.conflict(ex.getMessage()));
         }catch(InvalidDataException ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ResponseWrapper<>(false,ex.getMessage(),null));
+                    .body(ResponseWrapper.badRequest(ex.getMessage()));
         }catch (Exception ex){
+            log.error("Error when registration : {}", ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseWrapper<>(false,ex.getMessage(),null));
+                    .body(ResponseWrapper.internalServerError(ex.getMessage()));
 
         }
     }
 
-    @Operation(summary = "Login user", description = "")
+    @Operation(summary = "Login user", description = "Authenticate user credentials and return authentication details.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = ""),
-            @ApiResponse(responseCode = "404", description = "",
-                    content = @Content(schema = @Schema()))
+            @ApiResponse(responseCode = "200", description = "Authentication successful",
+                    content = @Content(schema = @Schema(implementation = ResponseWrapper.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid credentials provided",
+                    content = @Content(schema = @Schema(implementation = ResponseWrapper.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access",
+                    content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PostMapping(value="/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ResponseWrapper<AuthRes>> login(@Valid @RequestBody LoginReq request) {
+        log.debug("login route");
         try{
             AuthRes result = authService.authenticate(request);
-            //tester le retour de result avec le return
-            return ResponseEntity.ok(new ResponseWrapper<>(true,"authentication success",result));
-        }catch (BadCredentialsException e){
-            ResponseWrapper<AuthRes> result = new ResponseWrapper<>(false,e.getMessage(),null);
+            return ResponseEntity.ok(ResponseWrapper.ok(result,"login success"));
+        }catch (BadCredentialsException ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(result);
-        }catch (UnauthorizedException e){
-            ResponseWrapper<AuthRes> result = new ResponseWrapper<>(false,e.getMessage(),null);
+                    .body(ResponseWrapper.badRequest(ex.getMessage()));
+        }catch (UnauthorizedException ex){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(result);
+                    .body(ResponseWrapper.badRequest(ex.getMessage()));
         }
     }
 
-    @Operation(summary = "Logout user", description = "")
+    @Operation(summary = "Logout user", description = "Invalidate the user's session and clear security context.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = ""),
-            @ApiResponse(responseCode = "404", description = "",
-                    content = @Content(schema = @Schema()))
+            @ApiResponse(responseCode = "200", description = "Logout successful",
+                    content = @Content(schema = @Schema(implementation = ResponseWrapper.class))),
+            @ApiResponse(responseCode = "400", description = "Session already invalidated",
+                    content = @Content(schema = @Schema(implementation = ResponseWrapper.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected error during logout",
+                    content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PostMapping(value="/logout",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ResponseWrapper<String>> logout(HttpServletRequest request, HttpServletResponse response) {
 
+        log.debug("logout route");
         try{
             // Don't create session if it not exists
             HttpSession session = request.getSession(false);
@@ -101,16 +112,17 @@ public class AuthController {
             }
             SecurityContextHolder.clearContext();
             log.info("User successfully logged out");
-            return ResponseEntity.ok(new ResponseWrapper<>(true,"logout success",null));
+            return ResponseEntity.ok(ResponseWrapper.ok("","registration success"));
         } catch(IllegalStateException ex){
             log.error(ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ResponseWrapper<>(false,"Session already invalidate",null));
-        } catch(Exception e){
-            log.error("Unexpected error during logout", e);
+                    .body(ResponseWrapper.badRequest(ex.getMessage()));
+        } catch(Exception ex){
+            log.error("Unexpected error during logout", ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseWrapper<>(false,"Error during disconnection",null));
+                    .body(ResponseWrapper.internalServerError(ex.getMessage()));
         }
+
     }
 
 }

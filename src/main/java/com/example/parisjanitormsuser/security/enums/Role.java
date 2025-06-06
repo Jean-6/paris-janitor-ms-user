@@ -20,7 +20,15 @@ public enum Role {
     ),
     USER(
             Set.of(READ_PRIVILEGE)
-    );
+    ),
+    SUPPLIERS(
+            Set.of(READ_PRIVILEGE,WRITE_PRIVILEGE)
+    ),
+    TRAVELLERS(
+            Set.of(READ_PRIVILEGE,WRITE_PRIVILEGE)
+    )
+
+    ;
 
     private final Set<Privilege> privileges;
 

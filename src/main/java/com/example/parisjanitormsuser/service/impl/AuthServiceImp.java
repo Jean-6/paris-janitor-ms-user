@@ -25,7 +25,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +53,7 @@ public class AuthServiceImp implements AuthService {
     @Override
     public AuthRes register(RegisterReq request) {
 
-        log.debug("register : {}", request.toString());
+        log.debug("register : {}", request);
 
         if (userRepo.existsByPrivateInfoEmail(request.getPrivateInfo().getEmail())) {
             throw new UserAlreadyExistsException(ErrorMsg.USER_ALREADY_EXISTS);
@@ -65,22 +64,28 @@ public class AuthServiceImp implements AuthService {
                 request.getPrivateInfo().getPassword())){
             throw new InvalidDataException(ErrorMsg.INVALID_DATA);
         }
-        var user = User.builder()
-                .profileInfo(
-                        new ProfileInfo(request.getProfileInfo().getUsername(),Role.USER))
-                .privateInfo(
-                        new PrivateInfo(request.getPrivateInfo().getEmail(),passwordEncoder.encode(request.getPrivateInfo().getPassword())))
-                        .build();
 
-        log.debug("user to save : "+user.toString());
+        /*var roles = user.getProfileInfo().getRole().getAuthorities()
+                .stream()
+                .map(SimpleGrantedAuthority::getAuthority)
+                .toList();*/
+
+
+        var user = User.builder()
+                //.profileInfo(new ProfileInfo(request.getProfileInfo().getUsername(),Role.USER))
+                .privateInfo(new PrivateInfo(request.getPrivateInfo().getEmail(),passwordEncoder.encode(request.getPrivateInfo().getPassword())))
+                .build();
+        ProfileInfo profileInfo = new ProfileInfo();
+        profileInfo.setUsername(request.getProfileInfo().getUsername());
+        profileInfo.setRole(Role.USER);
+        //profileInfo.setUser(user);
+
+        user.setProfileInfo(profileInfo);
+
+        log.debug("user to save : {}", user);
         user = userRepo.save(user);
         var jwt = jwtService.generateToken(user);
         var refreshToken = refreshTokenService.createRefreshToken(user.getId());
-
-        var roles = user.getProfileInfo().getRole().getAuthorities()
-                .stream()
-                .map(SimpleGrantedAuthority::getAuthority)
-                .toList();
 
         return AuthRes.builder()
                 .id(user.getId())
@@ -115,12 +120,12 @@ public class AuthServiceImp implements AuthService {
                         log.error("user not found");
                         return new UnauthorizedException(ErrorMsg.BAD_CREDENTIALS);
                     });
-            log.debug(user.toString());
+            //log.debug("User founded : {}",user.toString());
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
-            log.debug("login 1: "+ user.toString());
+            log.debug("Authentication success : {} ", authentication.isAuthenticated());
             // Session creation
             userSessionCreation(user);
             // Token generation
