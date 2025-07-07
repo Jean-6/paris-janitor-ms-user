@@ -1,7 +1,7 @@
 package com.example.parisjanitormsuser.security.config;
 
 
-import com.example.parisjanitormsuser.security.handlers.ErrorResponse;
+import com.example.parisjanitormsuser.dto.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -32,13 +32,12 @@ public class Http401UnauthorizedEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        ErrorResponse body =
-                com.example.parisjanitormsuser.security.handlers.ErrorResponse.builder()
+        ErrorResponse body = ErrorResponse.builder()
                 .status(HttpServletResponse.SC_UNAUTHORIZED)
                 .error("Unauthorized")
                 .timestamp(Instant.now())
                 .message(authException.getMessage())
-                .path(request.getServletPath())
+                .path(request.getRequestURI())
                 .build();
         final ObjectMapper mapper = new ObjectMapper();
         // register the JavaTimeModule, which enables Jackson to support Java 8 and higher date and time types
