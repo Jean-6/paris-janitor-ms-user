@@ -60,7 +60,7 @@ public class ResponseWrapper<T>{
     }
 
     public static <T> ResponseWrapper<T> ok(T data, String message, String path) {
-        return new ResponseWrapper<>(true, message, data, HttpStatus.OK.value());
+        return new ResponseWrapper<>(true, message, data, HttpStatus.OK.value(),path);
     }
 
     public static <T> ResponseWrapper<T> badRequest(String message) {
