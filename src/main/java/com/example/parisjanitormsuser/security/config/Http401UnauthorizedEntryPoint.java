@@ -16,18 +16,18 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.logging.Logger;
+
 
 // interface used to manage authentication error , when user attempts to access protected resource
 @Component
 @Slf4j
 public class Http401UnauthorizedEntryPoint implements AuthenticationEntryPoint {
 
-    public static Logger logger = Logger.getLogger(Http401UnauthorizedEntryPoint.class.getName());
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
 
+        log.debug("Http401 Unauthorized Entry Point");
         log.error("Unauthorized error: {}", authException.getMessage());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
