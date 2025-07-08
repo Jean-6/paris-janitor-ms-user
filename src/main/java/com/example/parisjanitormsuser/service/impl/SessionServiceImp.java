@@ -5,8 +5,10 @@ import com.example.parisjanitormsuser.repository.SessionRepo;
 import com.example.parisjanitormsuser.exception.NotFoundException;
 import com.example.parisjanitormsuser.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,11 +38,40 @@ public class SessionServiceImp implements SessionService {
 
 
     @Override
-    public void deleteSessionById(Long id) {
-        if(!sessionRepo.existsById(id)){
+    public void revokeSessionById(Long id) {
+        Optional<Session> optionalSession = sessionRepo.findById(id);
+        if(optionalSession.isPresent()){
+            Session session = optionalSession.get();
+            session.revoked();
+            session.deactivated();
+            sessionRepo.save(session);
+        }else{
             throw new NotFoundException("Session id not found");
         }
-        sessionRepo.deleteById(id);
+    }
+
+    @Override
+    public void deleteSessionById(Long id) {
+        Optional<Session> optionalSession = sessionRepo.findById(id);
+        if(optionalSession.isPresent()){
+            sessionRepo.deleteById(id);
+        }else{
+            throw new NotFoundException("Session id not found");
+        }
+
+    }
+
+    @Scheduled(fixedRate = 60_000)
+    @Override
+    public void revokeExpiredSessions() {
+        List<Session> sessions = sessionRepo.findAll();
+        for(Session s : sessions){
+            if(!s.isRevoked() && Instant.now().isAfter(s.getExpires_at())){
+                s.revoked();
+                s.deactivated();
+                sessionRepo.save(s);
+            }
+        }
     }
 
 }

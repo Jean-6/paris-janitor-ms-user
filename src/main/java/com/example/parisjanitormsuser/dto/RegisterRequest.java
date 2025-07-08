@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterReq {
+public class RegisterRequest {
     @NotBlank
     private ProfileInfo profileInfo;
     @NotBlank

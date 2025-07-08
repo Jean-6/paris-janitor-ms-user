@@ -27,14 +27,20 @@ public class Session {
     @Column(nullable = false)
     private boolean revoked = false;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonBackReference
     private User user;
 
-    public boolean isActive(){
-        return !revoked && Instant.now().isAfter(createdAt);
-        //return !revoked && Instant.now().isBefore(expiresAt);
+    public void revoked(){
+        this.revoked = true;
+    }
+    public void deactivated(){
+        this.active = false;
+
     }
 
 }

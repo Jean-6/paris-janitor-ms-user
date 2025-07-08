@@ -25,6 +25,8 @@ import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+//import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -33,8 +35,7 @@ public class Security {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired
-    private  AuthenticationProvider authenticationProvider;
+    @Autowired private  AuthenticationProvider authenticationProvider;
     @Autowired
     private Http401UnauthorizedEntryPoint unauthorizedEntryPoint;
     @Autowired
@@ -51,19 +52,19 @@ public class Security {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(unauthorizedEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
-                .authorizeHttpRequests(request ->
-                        request
+                .authorizeHttpRequests(request -> request
                                 .requestMatchers(
                                         "/api/auth/**",
                                         "/api/password/**",
+                                        "/api/session/**",
                                         "/api/user/**",
+                                        "/api/user/change-status-request",
                                         "/api/refresh-token/**",
                                         //Swagger
                                         "/v3/api-docs/**",
                                         "/swagger-ui/**",// Resources Swagger (CSS, JS, etc.)
                                         "/api/logout"
                                 ).permitAll()
-
                                 .anyRequest().authenticated())
                 .logout(logout->logout
                         .logoutUrl("/api/auth/logout") // Define logout route

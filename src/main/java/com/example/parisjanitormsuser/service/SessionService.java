@@ -10,5 +10,7 @@ public interface SessionService {
     Session save(Session session);
     Optional<Session> findById(Long id);
     List<Session> findAll();
+    void revokeSessionById(Long id);
     void deleteSessionById(Long id);
+    public void revokeExpiredSessions();
 }

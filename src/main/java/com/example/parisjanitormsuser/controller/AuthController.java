@@ -2,6 +2,7 @@ package com.example.parisjanitormsuser.controller;
 
 import com.example.parisjanitormsuser.dto.*;
 import com.example.parisjanitormsuser.service.AuthService;
+import com.example.parisjanitormsuser.service.SessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -29,8 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "Authentication Controller", description = "Gestion de l'authentification")
 public class AuthController {
+
     @Autowired
     private AuthService authService;
+    @Autowired
+    private SessionService sessionService;
 
     @Operation(summary = "Register a new user", description = "Allows a user to create a new account by providing firstname, lastname, email, and password.")
     @ApiResponses(value = {
@@ -44,7 +44,7 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseWrapper<AuthRes>> register(@RequestBody RegisterReq request) {
+    public ResponseEntity<ResponseWrapper<AuthRes>> register(@RequestBody RegisterRequest request) {
         log.debug("register route");
         AuthRes authRes = authService.register(request);
         return ResponseEntity.ok(ResponseWrapper.ok(authRes, "registration success"));
@@ -60,7 +60,7 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseWrapper<AuthRes>> login(@Valid @RequestBody LoginReq request) {
+    public ResponseEntity<ResponseWrapper<AuthRes>> login(@Valid @RequestBody LoginRequest request) {
         log.debug("login route");
         AuthRes result = authService.authenticate(request);
         return ResponseEntity.ok(ResponseWrapper.ok(result, "login success"));
@@ -75,8 +75,8 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Unexpected error during logout",
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
-    @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseWrapper<String>> logout(HttpServletRequest request, HttpServletResponse response) {
+    @PostMapping(value = "/logout/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResponseWrapper<String>> logout(@PathVariable Long id, HttpServletRequest request) {
 
         log.debug("logout route");
 
@@ -85,9 +85,10 @@ public class AuthController {
         if (session != null) {
             session.invalidate();
         }
+        sessionService.revokeSessionById(id);
         SecurityContextHolder.clearContext();
         log.info("User successfully logged out");
-        return ResponseEntity.ok(ResponseWrapper.ok("", "registration success"));
+        return ResponseEntity.ok(ResponseWrapper.ok("", "successful disconnection"));
 
     }
 

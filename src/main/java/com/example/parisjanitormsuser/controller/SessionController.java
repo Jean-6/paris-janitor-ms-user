@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/user/session")
+@RequestMapping("/api/session")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Session Controller", description = "Responsible for managing user sessions, including authentication, session duration and security mechanisms")
@@ -78,13 +78,9 @@ public class SessionController {
     public ResponseEntity<ResponseWrapper<Session>> getById(@PathVariable Long id, HttpServletRequest request) {
 
         Optional<Session> optionalSession = this.sessionService.findById(id);
-        if (optionalSession.isPresent()) {
-            return ResponseEntity.ok().body(ResponseWrapper.ok(optionalSession.get(), request.getRequestURI()));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ResponseWrapper.error(null, "Session not found", HttpStatus.NOT_FOUND.value(), request.getRequestURI()));
-
-        }
+        return optionalSession.map(session -> ResponseEntity.ok().body(ResponseWrapper.ok(session, request.getRequestURI())))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseWrapper.error(null, "Session not found", HttpStatus.NOT_FOUND.value(), request.getRequestURI())));
     }
 
     @Operation(

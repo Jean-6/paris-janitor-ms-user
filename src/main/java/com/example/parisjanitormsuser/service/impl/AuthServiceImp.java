@@ -1,9 +1,9 @@
 package com.example.parisjanitormsuser.service.impl;
 
 import com.example.parisjanitormsuser.common.ErrorMsg;
-import com.example.parisjanitormsuser.dto.LoginReq;
+import com.example.parisjanitormsuser.dto.LoginRequest;
 import com.example.parisjanitormsuser.dto.AuthRes;
-import com.example.parisjanitormsuser.dto.RegisterReq;
+import com.example.parisjanitormsuser.dto.RegisterRequest;
 import com.example.parisjanitormsuser.entity.PrivateInfo;
 import com.example.parisjanitormsuser.entity.ProfileInfo;
 import com.example.parisjanitormsuser.entity.Session;
@@ -51,7 +51,7 @@ public class AuthServiceImp implements AuthService {
     private final RefreshTokenService refreshTokenService;
 
     @Override
-    public AuthRes register(RegisterReq request) {
+    public AuthRes register(RegisterRequest request) {
 
         log.debug("register : {}", request);
 
@@ -102,12 +102,12 @@ public class AuthServiceImp implements AuthService {
         Session session = new Session();
         session.setUser(user);
         session.setCreatedAt(Instant.now());
-        session.setExpires_at(Instant.now().plus(1,ChronoUnit.HOURS));
+        session.setExpires_at(Instant.now().plus(1,ChronoUnit.MINUTES));
         sessionRepo.save(session);
     }
 
     @Override
-    public AuthRes authenticate(LoginReq request) {
+    public AuthRes authenticate(LoginRequest request) {
 
         log.debug("login : "+ request.toString());
         try{
