@@ -52,7 +52,7 @@ public class SessionController {
     public ResponseEntity<ResponseWrapper<Session>> save(@RequestBody Session session, HttpServletRequest request) {
         log.debug("Save user session ");
         Session session1 = sessionService.save(session);
-        return ResponseEntity.ok().body(ResponseWrapper.ok(session1, request.getRequestURI()));
+        return ResponseEntity.ok().body(ResponseWrapper.ok("Utilisateur sauvegardé",request.getRequestURI(),session1));
 
     }
 
@@ -78,7 +78,7 @@ public class SessionController {
     public ResponseEntity<ResponseWrapper<Session>> getById(@PathVariable Long id, HttpServletRequest request) {
 
         Optional<Session> optionalSession = this.sessionService.findById(id);
-        return optionalSession.map(session -> ResponseEntity.ok().body(ResponseWrapper.ok(session, request.getRequestURI())))
+        return optionalSession.map(session -> ResponseEntity.ok().body(ResponseWrapper.ok("",request.getRequestURI(),session)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ResponseWrapper.error(null, "Session not found", HttpStatus.NOT_FOUND.value(), request.getRequestURI())));
     }
@@ -99,7 +99,7 @@ public class SessionController {
     public ResponseEntity<ResponseWrapper<List<Session>>> getAll(HttpServletRequest request) {
         log.debug("Get all sessions");
         List<Session> sessions = sessionService.findAll();
-        return ResponseEntity.ok().body(ResponseWrapper.ok(sessions, request.getRequestURI()));
+        return ResponseEntity.ok().body(ResponseWrapper.ok("Liste des sessions", request.getRequestURI(),sessions));
     }
 
     @Operation(

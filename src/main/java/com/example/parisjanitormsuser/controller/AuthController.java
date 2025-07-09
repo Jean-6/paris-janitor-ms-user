@@ -35,7 +35,7 @@ public class AuthController {
     @Operation(summary = "Register a new user", description = "Allows a user to create a new account by providing firstname, lastname, email, and password.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Registration successful",
-                    content = @Content(schema = @Schema(implementation = AuthRes.class))),
+                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
             @ApiResponse(responseCode = "409", description = "User already exists",
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class))),
             @ApiResponse(responseCode = "400", description = "Invalid data provided",
@@ -44,10 +44,10 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseWrapper<AuthRes>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<ResponseWrapper<RegisterResponse>> register(@RequestBody RegisterRequest request) {
         log.debug("register route");
-        AuthRes authRes = authService.register(request);
-        return ResponseEntity.ok(ResponseWrapper.ok(authRes, "registration success"));
+        RegisterResponse registerResponse = authService.register(request);
+        return ResponseEntity.ok(ResponseWrapper.ok("registration success",registerResponse));
     }
 
     @Operation(summary = "Login user", description = "Authenticate user credentials and return authentication details.")
@@ -60,10 +60,10 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseWrapper<AuthRes>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ResponseWrapper<LoginResponse>> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpServletRequest) {
         log.debug("login route");
-        AuthRes result = authService.authenticate(request);
-        return ResponseEntity.ok(ResponseWrapper.ok(result, "login success"));
+        LoginResponse result = authService.authenticate(request);
+        return ResponseEntity.ok(ResponseWrapper.ok("login success",httpServletRequest.getRequestURI(), result ));
     }
 
     @Operation(summary = "Logout user", description = "Invalidate the user's session and clear security context.")
@@ -79,7 +79,6 @@ public class AuthController {
     public ResponseEntity<ResponseWrapper<String>> logout(@PathVariable Long id, HttpServletRequest request) {
 
         log.debug("logout route");
-
         // Don't create session if it not exists
         HttpSession session = request.getSession(false);
         if (session != null) {
@@ -88,7 +87,7 @@ public class AuthController {
         sessionService.revokeSessionById(id);
         SecurityContextHolder.clearContext();
         log.info("User successfully logged out");
-        return ResponseEntity.ok(ResponseWrapper.ok("", "successful disconnection"));
+        return ResponseEntity.ok(ResponseWrapper.ok("successful disconnection", request.getRequestURI()));
 
     }
 

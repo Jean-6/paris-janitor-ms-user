@@ -2,8 +2,9 @@ package com.example.parisjanitormsuser.service.impl;
 
 import com.example.parisjanitormsuser.common.ErrorMsg;
 import com.example.parisjanitormsuser.dto.LoginRequest;
-import com.example.parisjanitormsuser.dto.AuthRes;
+import com.example.parisjanitormsuser.dto.LoginResponse;
 import com.example.parisjanitormsuser.dto.RegisterRequest;
+import com.example.parisjanitormsuser.dto.RegisterResponse;
 import com.example.parisjanitormsuser.entity.PrivateInfo;
 import com.example.parisjanitormsuser.entity.ProfileInfo;
 import com.example.parisjanitormsuser.entity.Session;
@@ -17,7 +18,7 @@ import com.example.parisjanitormsuser.security.exception.UnauthorizedException;
 import com.example.parisjanitormsuser.security.exception.UserAlreadyExistsException;
 import com.example.parisjanitormsuser.security.jwt.JwtService;
 import com.example.parisjanitormsuser.service.AuthService;
-import com.example.parisjanitormsuser.service.RefreshTokenService;
+import com.example.parisjanitormsuser.service.RefreshTokService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,10 +49,10 @@ public class AuthServiceImp implements AuthService {
     private SessionRepo sessionRepo;
     @Autowired
     private AuthenticationManager authenticationManager;
-    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokService refreshTokService;
 
     @Override
-    public AuthRes register(RegisterRequest request) {
+    public RegisterResponse register(RegisterRequest request) {
 
         log.debug("register : {}", request);
 
@@ -85,9 +86,9 @@ public class AuthServiceImp implements AuthService {
         log.debug("user to save : {}", user);
         user = userRepo.save(user);
         var jwt = jwtService.generateToken(user);
-        var refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        var refreshToken = refreshTokService.createRefreshToken(user.getId());
 
-        return AuthRes.builder()
+        return RegisterResponse.builder()
                 .id(user.getId())
                 .accessToken(jwt)
                 .email(user.getPrivateInfo().getEmail())
@@ -107,7 +108,7 @@ public class AuthServiceImp implements AuthService {
     }
 
     @Override
-    public AuthRes authenticate(LoginRequest request) {
+    public LoginResponse authenticate(LoginRequest request) {
 
         log.debug("login : "+ request.toString());
         try{
@@ -130,9 +131,9 @@ public class AuthServiceImp implements AuthService {
             userSessionCreation(user);
             // Token generation
             String jwt = jwtService.generateToken(user);
-            String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
+            String refreshToken = refreshTokService.createRefreshToken(user.getId()).getToken();
             // Response building
-            return AuthRes.builder()
+            return LoginResponse.builder()
                     .id(user.getId())
                     .email(user.getPrivateInfo().getEmail())
                     .profileInfo(user.getProfileInfo())
