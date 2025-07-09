@@ -1,6 +1,7 @@
 package com.example.parisjanitormsuser.entity;
 
 import com.example.parisjanitormsuser.security.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,7 +27,6 @@ public class User implements UserDetails {
     @Embedded
     private PrivateInfo privateInfo;
 
-    //@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Embedded
     private ProfileInfo profileInfo;
 
@@ -55,6 +55,7 @@ public class User implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public String getUsername() {
         return privateInfo.getEmail();
     }
