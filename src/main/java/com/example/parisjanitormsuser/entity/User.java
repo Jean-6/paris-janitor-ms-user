@@ -18,12 +18,13 @@ import java.util.*;
 @AllArgsConstructor
 public class User implements UserDetails {
 
-    @Getter
     @Setter
+    @Getter
     @jakarta.persistence.Id
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
     @Embedded
     private PrivateInfo privateInfo;
 
@@ -31,6 +32,7 @@ public class User implements UserDetails {
     private ProfileInfo profileInfo;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private ProviderInfo providerInfo;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

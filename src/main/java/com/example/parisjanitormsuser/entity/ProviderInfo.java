@@ -1,5 +1,6 @@
 package com.example.parisjanitormsuser.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,11 +17,13 @@ public class ProviderInfo {
     @Getter
     @Setter
     @Id
+    @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @Embedded
