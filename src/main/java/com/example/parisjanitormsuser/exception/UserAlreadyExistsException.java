@@ -1,4 +1,4 @@
-package com.example.parisjanitormsuser.security.exception;
+package com.example.parisjanitormsuser.exception;
 
 public class UserAlreadyExistsException extends RuntimeException{
     public UserAlreadyExistsException(String message) {
