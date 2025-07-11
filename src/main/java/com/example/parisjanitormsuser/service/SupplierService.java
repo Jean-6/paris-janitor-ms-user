@@ -1,17 +1,17 @@
 package com.example.parisjanitormsuser.service;
 
-import com.example.parisjanitormsuser.entity.Availability;
+import com.example.parisjanitormsuser.entity.ChangeStatus;
 import com.example.parisjanitormsuser.entity.Company;
-import com.example.parisjanitormsuser.entity.ProviderInfo;
+import com.example.parisjanitormsuser.entity.TimeSlot;
 
 import java.util.List;
 
-public interface ProviderService {
+public interface SupplierService {
 
-    ProviderInfo saveProviderInfo(
+    ChangeStatus saveInfo(
             Long userId,
             Company company,
             List<String> services,
             List<String> departments,
-            List<Availability> availabilities);
+            List<TimeSlot> timeSlots);
 }

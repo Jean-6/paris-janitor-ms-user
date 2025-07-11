@@ -2,12 +2,16 @@ package com.example.parisjanitormsuser.entity;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Entity
+
+@Data
+@Embeddable
+@AllArgsConstructor
+@NoArgsConstructor
 public class Reference {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     private String platform; // Airbnb, Booking, etc.
     private int numberOfPropertiesManaged;
     private String comment;

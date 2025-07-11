@@ -31,9 +31,8 @@ public class User implements UserDetails {
     @Embedded
     private ProfileInfo profileInfo;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private ProviderInfo providerInfo;
+    @Embedded
+    private Supplier supplier;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
