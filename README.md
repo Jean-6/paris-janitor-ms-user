@@ -1,46 +1,38 @@
 # ParisJanitor - Microservice des utilisateurs
 
-Ce microservice est une composante autonome conçue selon l'architecture en couche,
-il se concentre uniquement sur les fonctionnalités liées à la gestion des des profils utilisateurs,
-des permissions & rôles et de la sécurité (Bacic Auth/JWT).
+## 📖Table des matières
 
-## Table des matières
-
-1. [Introduction](#introduction)
-2. [Prérequis](#prérequis)
-3. [Architecture](#architecture)
-3. [Installation](#installation)
-4. [Configuration](#configuration)
-5. [Utilisation](#utilisation)
-6. [Tests](#tests)
-7. [Contribuer](#contribuer)
-8. [Licence](#licence)
-9. [Deploiement](#deploiement)
-10. [Points](#Points de Terminaison API)
-11. [Authentification](#Authentification)
-12. [Dépannage](#Dépannage)
+1. ✅[Introduction](#introduction)
+2. 📦[Prérequis](#prérequis)
+3. 🧱[Architecture](#architecture)
+3. ⚙️[Installation](#installation)
+4. 🔧[Configuration](#configuration)
+5. 🚀[Utilisation](#utilisation)
+6. 🧪[Tests](#tests)
+7. 🧑‍💻[Contribuer](#contribuer)
+8. 📄[Licence](#licence)
+9. 📦[Deploiement](#deploiement)
+10. ⭐[Points importants](#Terminaison API)
+11. 🔐[Authentification](#Authentification)
+12. 🛠️[Dépannage](#Dépannage)
 
 
 ## Introduction
 
-<!--Une brève description de votre projet -->
 Ce microservice est une composante autonome conçue selon l'architecture en couche,
 il se concentre uniquement sur les fonctionnalités liées à la gestion des des profils utilisateurs,
-des permissions & rôles et de la sécurité (Bacic Auth/JWT)
-
-
-![Swagger 1](./assets/swagger1.png)
-![Swagger 2](./assets/swagger2.png)
-
+des permissions & rôles.
 
 ## Prérequis
 
 - Java 17
 - Maven 3.9.9
+- Docker
 - Spring Boot 3.3.5
 - Spring Data JPA, Hibernate
 - Base de données relationnelles: MySQL Workbench 8.0
 - Spring Security (Basic Auth & JWT)
+- RabbitMQ
 
 ## Architecture en couche 
 
